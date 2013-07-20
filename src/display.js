@@ -272,6 +272,7 @@ ROT.Layer = function(display) {
 	this._data = {};
 	this._dirty = false; /* false = nothing, true = all, object = dirty cells */
 	this._display = display;
+	return this;
 }
 
 /**
@@ -367,7 +368,7 @@ ROT.Layer.prototype.drawText = function(x, y, text, maxWidth) {
  * Delete this layer.
  */
 ROT.Layer.prototype.remove = function() {
-	var index = display._layers.indexOf(item);
+	var index = display._layers.indexOf(this);
 	display._layers.splice(index, 1);
 }
 
