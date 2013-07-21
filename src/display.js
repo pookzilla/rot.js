@@ -370,6 +370,7 @@ ROT.Layer.prototype.drawText = function(x, y, text, maxWidth) {
 ROT.Layer.prototype.remove = function() {
 	var index = display._layers.indexOf(this);
 	display._layers.splice(index, 1);
+	this._display._dirty = true;
 }
 
 /**
@@ -379,5 +380,6 @@ ROT.Layer.prototype.remove = function() {
 ROT.Display.prototype.newLayer = function() {
 	var layer = new ROT.Layer(this);
 	this._layers.push(layer);
+	this._dirty = true;
 	return layer;
 }
