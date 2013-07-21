@@ -69,7 +69,18 @@ ROT.UI.Window = function(layer, handler) {
 }
 
 ROT.UI.Window.prototype.remove = function() {
-	ROT.UI.keyHandler.handlerStack.pop();
+	var index;
+	var stack = ROT.UI.keyHandler.handlerStack;
+	for (var i = stack.length - 1; i >= 0; i--) {
+		var handlerPair = stack[i];
+		if (handlerPair.window == this) {
+			index = i;
+			break;
+		}
+	}
+	if (index) {
+		stack.splice(index, 1);
+	}
 	this._layer.remove();
 }
 
