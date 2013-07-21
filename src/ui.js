@@ -1,4 +1,3 @@
-
 ROT.UI = {
 	NO_LINE : 0,
 	SINGLE_LINE: 1, 
@@ -26,8 +25,31 @@ ROT.UI = {
 			result = ROT.UI.defaultOptions[option];
 		}
 		return result;
+	},
+	keyHandler : {
+		handlerStack : [],
+		handle : function(charCode) {
+			var stack = ROT.UI.keyHandler.handlerStack;
+			for (var i = stack.length - 1; i >= 0; i--) {
+				var handlerPair = stack[i];
+				if (handlerPair.handler(handlerPair.window, charCode)) {
+					break;
+				}
+			}
+		}
 	}
 }
+
+document.onkeydown = function(evt) {
+    evt = evt || window.event;
+    ROT.UI.keyHandler.handle(event.keyCode);
+};
+
+document.onkeypress = function(evt) {
+    evt = evt || window.event;
+    var charCode = evt.which || evt.keyCode;
+    ROT.UI.keyHandler.handle(charCode);    
+};
 
 //ROT.UI.defaultOptions.borderLeft = ROT.UI.SINGLE_LINE;
 //ROT.UI.defaultOptions.borderRight = ROT.UI.SINGLE_LINE;
@@ -39,11 +61,15 @@ ROT.UI.setDefaultOptions = function(options) {
 	ROT.UI.defaultOptions = options;
 }
 
-ROT.UI.Window = function(layer) {
+ROT.UI.Window = function(layer, handler) {
+	handler = handler || function(charCode) {}
+	ROT.UI.keyHandler.handlerStack.push({window: this, handler: handler});
 	this._layer = layer;
 	return this;
 }
+
 ROT.UI.Window.prototype.remove = function() {
+	ROT.UI.keyHandler.handlerStack.pop();
 	this._layer.remove();
 }
 
@@ -53,7 +79,7 @@ ROT.UI.newWindow = function(display, x, y, width, height, options) {
 	}
 
 	var layer = display.newLayer();
-	var window =  new ROT.UI.Window(layer);
+	var window =  new ROT.UI.Window(layer, options != null ? options.keyHandler : null);
 	var colorCode = "%c{" + ROT.UI.getOption(options, "fg") + "}%b{" + ROT.UI.getOption(options, "bg") + "}";
 	var option = ROT.UI.getOption(options, "border");	
 	//note on the odd math in the Array(width +/-) calls - see http://stackoverflow.com/questions/1877475/repeat-character-n-times for details
@@ -108,7 +134,6 @@ ROT.UI.newWindow = function(display, x, y, width, height, options) {
 	}
 	return window;
 }
-
 
 ROT.UI.newDialog = function(display, x, y, text, maxWidth, options) {
 
