@@ -369,8 +369,10 @@ ROT.Layer.prototype.drawText = function(x, y, text, maxWidth) {
  */
 ROT.Layer.prototype.remove = function() {
 	var index = display._layers.indexOf(this);
-	display._layers.splice(index, 1);
-	this._display._dirty = true;
+	if (index >= 0) {
+		display._layers.splice(index, 1);
+		this._display._dirty = true;
+	}
 }
 
 /**
