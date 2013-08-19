@@ -334,9 +334,25 @@ ROT.Layer.prototype.drawText = function(x, y, text, maxWidth) {
 	var lines = 1;
 
 	var tokens = ROT.Text.tokenize(text, maxWidth);
+	return this.drawTextTokens(x, y, tokens);
+}
 
-	while (tokens.length) { /* interpret tokenized opcode stream */
-		var token = tokens.shift();
+/**
+ * Draws a text at given position. Optionally wraps at a maximum length. Currently does not work with hex layout.
+ * @param {int} x
+ * @param {int} y
+ * @param {object} text tokens
+ * @returns {int} lines drawn
+ */
+ROT.Layer.prototype.drawTextTokens = function(x, y, tokens) {
+	var fg = null;
+	var bg = null;
+	var cx = x;
+	var cy = y;
+	var lines = 1;
+
+	for (var l = 0; l < tokens.length; l++) { /* interpret tokenized opcode stream */
+		var token = tokens[l];
 		switch (token.type) {
 			case ROT.Text.TYPE_TEXT:
 				for (var i=0;i<token.value.length;i++) {

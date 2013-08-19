@@ -84,6 +84,54 @@ ROT.UI.Window.prototype.remove = function() {
 	this._layer.remove();
 }
 
+ROT.UI.TextScroll = function(layer, x, y, width, height) {
+	this._layer = layer;
+	this._tokens = ROT.Text.tokenize("", width);
+	this._maxHeight = height;
+	this._height = 0;
+	this._x = x;
+	this._y = y;
+	return this;
+}
+
+ROT.UI.TextScroll.prototype.append = function(text) {
+	if (text[text.length - 1] != '\n') {
+		text = text + "\n"; // make sure we're adding a newline
+	}
+	
+	var newTokens = ROT.Text.tokenize(text, this._width);
+	var newHeight = 0;
+	for (var i = 0; i < newTokens.length; i++) { // count the number of new lines
+		var token = newTokens[i];
+		switch (token.type) {
+			case ROT.Text.TYPE_NEWLINE:
+				newHeight++;
+			break;
+		}
+	}
+
+	var numberToRemove = this._height == this._maxHeight ? newHeight : 0; // how much over the max size are we?
+	this._height = Math.min(this._height + newHeight, this._maxHeight);
+	
+	while (numberToRemove > 0) { // remove all lines that have been pushed off (possibly none)
+		var token = this._tokens.shift();
+		switch (token.type) {
+			case ROT.Text.TYPE_NEWLINE:
+				numberToRemove--;
+			break;
+		}
+	}
+	this._tokens.push.apply(this._tokens, newTokens); // now add the new ones
+	this._layer.clear();
+	this._layer.drawTextTokens(this._x, this._y, this._tokens);
+}
+
+ROT.UI.TextScroll.prototype.clear = function() {
+	this._tokens = ROT.Text.tokenize("", this._width);
+	this._height = 0;
+	this._layer.clear();
+}
+
 ROT.UI.newWindow = function(display, x, y, width, height, options) {
 	if (display === null || width < 3 || height < 3) {
 		return null;
@@ -144,6 +192,17 @@ ROT.UI.newWindow = function(display, x, y, width, height, options) {
 		layer.drawText(x, y + i, colorCode + currentRow);
 	}
 	return window;
+}
+
+ROT.UI.newTextScroll = function(display, x, y, width, height) {
+	if (display === null || width < 3 || height < 3) {
+		return null;
+	}
+
+	var layer = display.newLayer();
+	var scroll =  new ROT.UI.TextScroll(layer, x, y, width, height);
+	
+	return scroll;
 }
 
 ROT.UI.newDialog = function(display, x, y, text, maxWidth, options) {
