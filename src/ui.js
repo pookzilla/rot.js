@@ -84,13 +84,14 @@ ROT.UI.Window.prototype.remove = function() {
 	this._layer.remove();
 }
 
-ROT.UI.TextScroll = function(layer, x, y, width, height) {
+ROT.UI.TextScroll = function(layer, x, y, width, height, options) {
 	this._layer = layer;
 	this._tokens = ROT.Text.tokenize("", width);
 	this._maxHeight = height;
 	this._height = 0;
 	this._x = x;
 	this._y = y;
+	this._options = options ? options : {};
 	return this;
 }
 
@@ -98,6 +99,15 @@ ROT.UI.TextScroll.prototype.append = function(text) {
 	if (text[text.length - 1] != '\n') {
 		text = text + "\n"; // make sure we're adding a newline
 	}
+	var preamble = "";
+	if (this._options["fg"]) {
+		preamble = "%c{" + this._options["fg"] + "}" + preamble;
+	}
+	if (this._options["bg"]) {
+		preamble = "%b{" + this._options["bg"] + "}" + preamble;
+	}
+	
+	text = preamble + text;
 	
 	var newTokens = ROT.Text.tokenize(text, this._width);
 	var newHeight = 0;
@@ -194,13 +204,13 @@ ROT.UI.newWindow = function(display, x, y, width, height, options) {
 	return window;
 }
 
-ROT.UI.newTextScroll = function(display, x, y, width, height) {
+ROT.UI.newTextScroll = function(display, x, y, width, height, options) {
 	if (display === null || width < 3 || height < 3) {
 		return null;
 	}
 
 	var layer = display.newLayer();
-	var scroll =  new ROT.UI.TextScroll(layer, x, y, width, height);
+	var scroll =  new ROT.UI.TextScroll(layer, x, y, width, height, options ? options : display.getOptions());
 	
 	return scroll;
 }
